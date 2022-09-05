@@ -33,17 +33,23 @@ init_image = init_image.resize((768, 512))
 init_image.save(name + "_orig.png")
 init_image = preprocess(init_image)
 
-prompt = "high resolution photograph of a fuel truck parked next to a jet airplane on the runway."
 generic_prompt = "high resolution photograph"
+
+if len(sys.argv) == 4:
+    prompt = sys.argv[3]
+    print("Using prompt", prompt)
+else:
+    prompt = generic_prompt
+# prompt = "high resolution photograph of a jet airplane on the runway."
 
 with autocast("cuda"):
 
     for strength_level in range(3,10):
         strength = strength_level/10.
         images = pipe(prompt=prompt, init_image=init_image, strength=strength, guidance_scale=guidance_scale)["sample"]
-        images[0].save("samples/specific_prompt_{}_str{}_gs{}.png".format(name, strength, guidance_scale))
+        images[0].save("samples/generated_{}_str{}_gs{}.png".format(name, strength, guidance_scale))
 
-    for strength_level in range(3,10):
-        strength = strength_level/10.
-        images = pipe(prompt=generic_prompt, init_image=init_image, strength=strength, guidance_scale=guidance_scale)["sample"]
-        images[0].save("samples/generic_prompt_{}_str{}_gs{}.png".format(name, strength, guidance_scale))
+    # for strength_level in range(3,10):
+    #     strength = strength_level/10.
+    #     images = pipe(prompt=generic_prompt, init_image=init_image, strength=strength, guidance_scale=guidance_scale)["sample"]
+    #     images[0].save("samples/generic_prompt_{}_str{}_gs{}.png".format(name, strength, guidance_scale))
