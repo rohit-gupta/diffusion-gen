@@ -10,6 +10,15 @@ import sys
 
 from image_to_image import StableDiffusionImg2ImgPipeline, preprocess
 
+
+def load_image(input_file):
+    
+    init_image = Image.open(input_file).convert("RGB")
+    init_image = init_image.resize((768, 512))
+    init_image = preprocess(init_image)
+
+    return init_image 
+
 # load the pipeline
 device = "cuda"
 pipe = StableDiffusionImg2ImgPipeline.from_pretrained("CompVis/stable-diffusion-v1-4",
@@ -24,16 +33,15 @@ pipe = StableDiffusionImg2ImgPipeline.from_pretrained("CompVis/stable-diffusion-
 # init_image = Image.open(BytesIO(response.content)).convert("RGB")
 # ID = 5
 # name = dronesynth_images[ID].split("/")[-1].split(".")[0]
-input_file = sys.argv[1]
-name = input_file.split(".")[0]
-strength = 0.5
-guidance_scale = 7.0
-init_image = Image.open(input_file).convert("RGB")
-init_image = init_image.resize((768, 512))
-init_image.save(name + "_orig.png")
-init_image = preprocess(init_image)
 
-generic_prompt = "high resolution photograph"
+# strength = 0.5
+
+guidance_scale = 7.0
+
+# init_image.save(name + "_orig.png")
+
+
+generic_prompt = "high resolution grayscale outdoor photograph"
 
 if len(sys.argv) == 4:
     prompt = sys.argv[3]
@@ -44,10 +52,16 @@ else:
 
 with autocast("cuda"):
 
-    for strength_level in range(3,10):
-        strength = strength_level/10.
-        images = pipe(prompt=prompt, init_image=init_image, strength=strength, guidance_scale=guidance_scale)["sample"]
-        images[0].save("samples/generated_{}_str{}_gs{}.png".format(name, strength, guidance_scale))
+    src_images = glob('/home/c3-0/rohitg/datasets/dogfight/fldrone/diffusionTrainingBackgroundNoDrones/*')
+
+    for image in src_images:
+        name = image.split("/")[-1].split(".")[0]
+        init_image = load_image(image)
+
+        for strength_level in range(5,10):
+            strength = strength_level/10.
+            images = pipe(prompt=prompt, init_image=init_image, strength=strength, guidance_scale=guidance_scale)["sample"]
+            images[0].save("fldrone_samples/generated_{}_str{}_gs{}.png".format(name, strength, guidance_scale))
 
     # for strength_level in range(3,10):
     #     strength = strength_level/10.
