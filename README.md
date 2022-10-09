@@ -1,5 +1,5 @@
 # diffusion-gen
-Use stable diffusion to generate images guided by text
+Use stable diffusion to generate synthetic images to train a drone object detector
 
 # INSTALLATION
 
